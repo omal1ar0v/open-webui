@@ -4,6 +4,7 @@
 
 	import dayjs from 'dayjs';
 	import localizedFormat from 'dayjs/plugin/localizedFormat';
+	import { base } from '$app/paths';
 	import { getTimeRange } from '$lib/utils';
 	import ChevronUp from '$lib/components/icons/ChevronUp.svelte';
 	import ChevronDown from '$lib/components/icons/ChevronDown.svelte';
@@ -167,7 +168,7 @@
 					{#if showOwnerInfo && chat.user_id && chat.owner_name}
 						<Tooltip content={chat.owner_name}>
 							<img
-								src="/api/v1/users/{chat.user_id}/profile/image"
+								src="{base}/api/v1/users/{chat.user_id}/profile/image"
 								alt=""
 								class="size-4 rounded-full shrink-0 object-cover"
 							/>

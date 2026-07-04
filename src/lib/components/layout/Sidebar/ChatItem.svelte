@@ -7,7 +7,9 @@
 
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
-	import { goto, invalidate, invalidateAll } from '$app/navigation';
+	import { invalidate, invalidateAll } from '$app/navigation';
+	import { goto } from '$lib/utils/nav';
+	import { base } from '$app/paths';
 	import { onMount, getContext, createEventDispatcher, tick } from 'svelte';
 	import {
 		archiveChatById,
@@ -549,7 +551,7 @@
 			{#if ownerUserId}
 				<Tooltip content={ownerName || 'Unknown'}>
 					<img
-						src="/api/v1/users/{ownerUserId}/profile/image"
+						src="{base}/api/v1/users/{ownerUserId}/profile/image"
 						alt=""
 						class="size-3.5 rounded-full shrink-0 object-cover mr-1.5"
 					/>

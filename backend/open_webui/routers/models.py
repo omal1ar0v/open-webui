@@ -559,6 +559,10 @@ async def get_model_profile_image(
     profile_image_url = None
     updated_at = None
 
+    # Behind a reverse-proxy subpath (e.g. /openwebui), prepend the forwarded
+    # prefix to root-relative redirect targets so they don't 404 at the origin root.
+    forwarded_prefix = request.headers.get('X-Forwarded-Prefix', '').rstrip('/')
+
     # First, check the database for regular models
     model_meta = await Models.get_model_meta_by_id(id, db=db)
     if model_meta:
@@ -593,7 +597,7 @@ async def get_model_profile_image(
                 # only serve known-safe raster types inline; reject SVG/unknown (can run script on our origin)
                 if media_type not in PROFILE_IMAGE_ALLOWED_MIME_TYPES:
                     return RedirectResponse(
-                        url='/static/favicon.png',
+                        url=f'{forwarded_prefix}/static/favicon.png',
                         status_code=status.HTTP_302_FOUND,
                     )
 
@@ -615,12 +619,12 @@ async def get_model_profile_image(
             safe_static = _safe_static_redirect_path(profile_image_url)
             if safe_static:
                 return RedirectResponse(
-                    url=safe_static,
+                    url=f'{forwarded_prefix}{safe_static}',
                     status_code=status.HTTP_302_FOUND,
                 )
 
     return RedirectResponse(
-        url='/static/favicon.png',
+        url=f'{forwarded_prefix}/static/favicon.png',
         status_code=status.HTTP_302_FOUND,
     )
 

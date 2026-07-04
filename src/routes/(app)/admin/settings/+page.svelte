@@ -1,5 +1,5 @@
 <script>
-	import { goto } from '$app/navigation';
+	import { goto } from '$lib/utils/nav';
 	import { onMount } from 'svelte';
 
 	onMount(() => {

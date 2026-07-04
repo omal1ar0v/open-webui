@@ -40,6 +40,9 @@ RUN npm ci --force
 
 COPY . .
 ENV APP_BUILD_HASH=${BUILD_HASH}
+# Optional base path (e.g. /openwebui) to serve the app under a reverse-proxy subpath.
+ARG WEBUI_BASE_PATH=""
+ENV WEBUI_BASE_PATH=${WEBUI_BASE_PATH}
 RUN npm run build
 
 ######## WebUI backend ########

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { goto } from '$app/navigation';
+	import { goto } from '$lib/utils/nav';
 
 	import { settings, showSettings, terminalServers, selectedTerminalId, user } from '$lib/stores';
 	import { getToolServersData } from '$lib/apis';

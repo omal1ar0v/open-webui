@@ -3,7 +3,7 @@
 	const i18n = getContext('i18n');
 	const dispatch = createEventDispatcher();
 
-	import { goto } from '$app/navigation';
+	import { goto } from '$lib/utils/nav';
 	import { chatId, mobile, showSidebar } from '$lib/stores';
 	import { getSharedFolderChats } from '$lib/apis/folders';
 

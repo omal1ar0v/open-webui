@@ -35,7 +35,7 @@
 		tags
 	} from '$lib/stores';
 	import Messages from '../chat/Messages.svelte';
-	import { goto } from '$app/navigation';
+	import { goto } from '$lib/utils/nav';
 	import PencilSquare from '../icons/PencilSquare.svelte';
 	import PageEdit from '../icons/PageEdit.svelte';
 

@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext, onMount, tick } from 'svelte';
+	import { base } from '$app/paths';
 
-	import { goto } from '$app/navigation';
+	import { goto } from '$lib/utils/nav';
 	import { fade, slide } from 'svelte/transition';
 
 	import { getUsage } from '$lib/apis';
@@ -627,7 +628,7 @@
 					user.set(null);
 					localStorage.removeItem('token');
 
-					location.href = res?.redirect_url ?? '/auth';
+					location.href = res?.redirect_url ?? `${base}/auth`;
 					show = false;
 				}}
 			>

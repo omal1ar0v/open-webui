@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DOMPurify from 'dompurify';
+	import { base } from '$app/paths';
 	import { marked } from 'marked';
 
 	import { getAdminDetails, userSignOut } from '$lib/apis/auths';
@@ -61,7 +62,7 @@
 					<button
 						class="relative z-20 flex px-5 py-2 rounded-full bg-white border border-gray-100 dark:border-none hover:bg-gray-100 text-gray-700 transition font-medium text-sm"
 						on:click={async () => {
-							location.href = '/';
+							location.href = `${base}/`;
 						}}
 					>
 						{$i18n.t('Check Again')}
@@ -75,7 +76,7 @@
 								return null;
 							});
 							localStorage.removeItem('token');
-							location.href = res?.redirect_url ?? '/auth';
+							location.href = res?.redirect_url ?? `${base}/auth`;
 						}}>{$i18n.t('Sign Out')}</button
 					>
 				</div>

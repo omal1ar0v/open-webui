@@ -40,10 +40,11 @@
 		desktopEvent
 	} from '$lib/stores';
 	import { getFileContentById } from '$lib/apis/files';
-	import { goto } from '$app/navigation';
+	import { goto } from '$lib/utils/nav';
 	import { page } from '$app/stores';
 	import { beforeNavigate } from '$app/navigation';
 	import { updated } from '$app/state';
+	import { base } from '$app/paths';
 
 	import i18n, { initI18n, getLanguages, changeLanguage } from '$lib/i18n';
 
@@ -124,12 +125,12 @@
 	const DISCONNECT_TOAST_DELAY_MS = 2000;
 
 	const setupSocket = async (enableWebsocket) => {
-		const _socket = io(`${WEBUI_BASE_URL}` || undefined, {
+		const _socket = io(WEBUI_BASE_URL.startsWith('http') ? WEBUI_BASE_URL : undefined, {
 			reconnection: true,
 			reconnectionDelay: 1000,
 			reconnectionDelayMax: 5000,
 			randomizationFactor: 0.5,
-			path: '/ws/socket.io',
+			path: `${base}/ws/socket.io`,
 			transports: enableWebsocket ? ['websocket'] : ['polling', 'websocket'],
 			auth: { token: localStorage.token }
 		});
@@ -629,7 +630,7 @@
 					) {
 						playingNotificationSound.set(true);
 
-						const audio = new Audio(`/audio/notification.mp3`);
+						const audio = new Audio(`${base}/audio/notification.mp3`);
 						audio.play().finally(() => {
 							// Ensure the global state is reset after the sound finishes
 							playingNotificationSound.set(false);
@@ -845,7 +846,7 @@
 			user.set(null);
 			localStorage.removeItem('token');
 
-			location.href = res?.redirect_url ?? '/auth';
+			location.href = res?.redirect_url ?? `${base}/auth`;
 		}
 	};
 
@@ -953,6 +954,51 @@
 	};
 
 	onMount(async () => {
+		// Base-path: SvelteKit doesn't prefix the base on <a href="/..."> links.
+		// Rewrite root-relative internal links centrally (capture phase, before the
+		// router handles the click) so we don't have to touch every link. No-op when
+		// base is empty (default build).
+		if (base) {
+			const prefixInternalLink = (e) => {
+				const a = e.target?.closest?.('a[href]');
+				if (!a) return;
+				const href = a.getAttribute('href');
+				if (
+					href &&
+					href[0] === '/' &&
+					href[1] !== '/' &&
+					href !== base &&
+					!href.startsWith(`${base}/`) &&
+					!a.hasAttribute('download')
+				) {
+					a.setAttribute('href', `${base}${href}`);
+				}
+			};
+			document.addEventListener('pointerdown', prefixInternalLink, true);
+			document.addEventListener('click', prefixInternalLink, true);
+
+			// Same idea for <img> that fail with a root-relative src — e.g. model/user
+			// icon on:error fallbacks like '/favicon.png' or '/user.png'. Retry under base.
+			const prefixFailedImage = (e) => {
+				const img = e.target;
+				if (!(img instanceof HTMLImageElement)) return;
+				const src = img.getAttribute('src');
+				if (!src) return;
+				let path;
+				try {
+					const u = new URL(src, location.origin);
+					if (u.origin !== location.origin) return;
+					path = u.pathname + u.search;
+				} catch {
+					return;
+				}
+				if (path[0] === '/' && path[1] !== '/' && path !== base && !path.startsWith(`${base}/`)) {
+					img.src = `${base}${path}`;
+				}
+			};
+			document.addEventListener('error', prefixFailedImage, true);
+		}
+
 		const originalFetch = window.fetch.bind(window);
 		window.fetch = async (input, init) => {
 			const response = await originalFetch(input, init);
@@ -1099,7 +1145,7 @@
 			if (error?.authRedirect) {
 				// Forward-auth proxy is redirecting to an external login page.
 				// Full-page navigation lets the browser follow the redirect natively.
-				window.location.href = '/';
+				window.location.href = `${base}/`;
 				return;
 			}
 			console.error('Error loading backend config:', error);
@@ -1197,7 +1243,7 @@
 
 			document.getElementById('splash-screen')?.remove();
 
-			const audio = new Audio(`/audio/greeting.mp3`);
+			const audio = new Audio(`${base}/audio/greeting.mp3`);
 			const playAudio = () => {
 				audio.play();
 				document.removeEventListener('click', playAudio);
